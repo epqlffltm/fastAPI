@@ -1,5 +1,9 @@
+from importlib.resources import contents
+
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Boolean, Column, Integer, String
+
+from schema.request import CreateTodoRequest
 
 Base = declarative_base()
 
@@ -12,4 +16,15 @@ class ToDo(Base):
 
     def __repr__(self):
         return f"ToDo(id={self.id}, content={self.content}, is_done={self.is_done})"
-    
+
+    @classmethod
+    def create(cls, request: CreateTodoRequest) -> "ToDo":
+        return cls(content = request.contents, is_done = request.is_done,)
+
+    def done(self) -> "ToDo":
+        self.is_done = True
+        return self
+
+    def undone(self) -> "ToDo":
+        self.is_done = False
+        return self
