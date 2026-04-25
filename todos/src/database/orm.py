@@ -11,15 +11,15 @@ class ToDo(Base):
     __tablename__ = 'todos'
 
     id = Column(Integer, primary_key=True, index=True)
-    content = Column(String(256), nullable=False)
+    contents = Column(String(256), nullable=False)
     is_done = Column(Boolean, nullable=False)
 
     def __repr__(self):
-        return f"ToDo(id={self.id}, content={self.content}, is_done={self.is_done})"
+        return f"ToDo(id={self.id}, contents={self.content}, is_done={self.is_done})"
 
     @classmethod
     def create(cls, request: CreateTodoRequest) -> "ToDo":
-        return cls(content = request.contents, is_done = request.is_done,)
+        return cls(contents = request.contents, is_done = request.is_done,)
 
     def done(self) -> "ToDo":
         self.is_done = True

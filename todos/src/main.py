@@ -12,13 +12,13 @@ from schema.request import CreateTodoRequest
 from schema.response import ToDoListSchema, ToDoSchema
 
 app = FastAPI()
-
+"""
 todo_data = {
     1: {"id": 1, "contents": "test1", "is_done": True,},
     2: {"id": 2, "contents": "test2", "is_done": False,},
     3: {"id": 3, "contents": "test3", "is_done": False,},
 }
-
+"""
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -36,15 +36,15 @@ def get_todos_handler(
 
     #ret = list(todo_data.values())
     if order and order == "DESC":
-        return ToDoListSchema(todos=[ToDoSchema.from_orm(todo) for todo in todos[::-1]])
-    return ToDoListSchema(todos=[ToDoSchema.from_orm(todo) for todo in todos])
+        return ToDoListSchema(todos=[ToDoSchema.model_validate(todo) for todo in todos[::-1]])
+    return ToDoListSchema(todos=[ToDoSchema.model_validate(todo) for todo in todos])
 
 @app.get("/todos/{id}",status_code=200)
 def get_todos_handler(id: int, session: Session = Depends(get_db),):
     #todo = todo_data.get(id)
     todo: ToDo | None = get_todo_by_todo_id(session = session, todo_id = id)
     if todo:
-        return ToDoSchema.from_orm(todo)
+        return ToDoSchema.model_validate(todo)
     raise HTTPException(status_code=404, detail="ToDo Not found")
 
 @app.post("/todos",status_code=201)
@@ -53,7 +53,7 @@ def create_todos_handler(request: CreateTodoRequest, session: Session = Depends(
     todo: ToDo = create_todo(session = session, todo = todo)
     #todo_data[request.id] = request.model_dump()
     #return todo_data[request.id]
-    return ToDoSchema.from_orm(todo)
+    return ToDoSchema.model_validate(todo)
 
 @app.patch("/todos/{id}",status_code=200)
 def get_todos_handler(id: int, is_done: bool = Body(...,embed=True),session: Session = Depends(get_db),):
@@ -72,7 +72,7 @@ def get_todos_handler(id: int, is_done: bool = Body(...,embed=True),session: Ses
         #update
         #todo["is_done"] = is_done
         #return  todo
-        return ToDoSchema.from_orm(todo)
+        return ToDoSchema.model_validate(todo)
     raise HTTPException(status_code=404,detail="ToDo Not found")
 
 @app.delete("/todos/{id}", status_code=204)
