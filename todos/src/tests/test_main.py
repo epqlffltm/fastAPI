@@ -5,6 +5,7 @@ from main import app
 from database.connection import get_db
 from database.orm import ToDo #테이블 생성을 위해 임포트
 #from schema.response import ToDoListSchema
+from database.repository import ToDoRepository
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_todos.db"
 
@@ -35,7 +36,7 @@ def test_get_todos(mocker, client):
 #    client.post("/todos", json={"contents": "fastapi section 3", "is_done": True})
 
     # order=ASC
-    mocker.patch("main.get_todos", return_value= [
+    mocker.patch.object(ToDoRepository,"get_todos", return_value= [
         ToDo(id=1, contents="fastapi section 1", is_done=True),
         ToDo(id=2, contents="fastapi section 2", is_done=False),
     ])
@@ -59,20 +60,20 @@ def test_get_todos(mocker, client):
     ]}
 def test_get_todo(client, mocker):
     #200
-    mocker.patch("main.get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
     response = client.get("/todos/1")
     assert response.status_code == 200
     assert response.json() == {"id": 1, "contents": "fastapi section 1", "is_done": True}
 
     #404
-    mocker.patch("main.get_todo_by_todo_id", return_value = None)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = None)
     response = client.get("/todos/1")
     assert response.status_code == 404
     assert response.json() == {"detail": "ToDo Not found"}
 
 def test_create_todo(mocker, client):
     create_spy = mocker.spy(ToDo, "create")
-    mocker.patch("main.create_todo", return_value=ToDo(id=1, contents="todo", is_done=True))
+    mocker.patch.object(ToDoRepository,"create_todo", return_value=ToDo(id=1, contents="todo", is_done=True))
 
     body={"contents": "test", "is_done": False,}
 
@@ -88,10 +89,10 @@ def test_create_todo(mocker, client):
 def test_update_todo(mocker, client):
     #200
     #True와 False를 반복하며 test 할 것
-    mocker.patch("main.get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
     undone=mocker.patch.object(ToDo, "undone")
     body={"contents": "test", "is_done": False,}
-    mocker.patch("main.update_todo", return_value = ToDo(id=1, contents="fastapi section 1", is_done=False),)
+    mocker.patch.object(ToDoRepository,"update_todo", return_value = ToDo(id=1, contents="fastapi section 1", is_done=False),)
 
     response = client.patch("/todos/1", json={"is_done": False})
 
@@ -101,7 +102,7 @@ def test_update_todo(mocker, client):
     assert response.json() == {"id": 1, "contents": "fastapi section 1", "is_done": False}
 
     #404
-    mocker.patch("main.get_todo_by_todo_id", return_value = None)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = None)
 
     response = client.patch("/todos/1",json={"is_done": True})
     assert response.status_code == 404
@@ -109,14 +110,14 @@ def test_update_todo(mocker, client):
 
 def test_delete_todo(mocker, client):
     #204
-    mocker.patch("main.get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
-    mocker.patch("main.delete_todo", return_value=None)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = ToDo(id=1, contents="fastapi section 1", is_done=True),)
+    mocker.patch.object(ToDoRepository,"delete_todo", return_value=None)
 
     response = client.delete("/todos/1")
     assert response.status_code == 204
 
     #404
-    mocker.patch("main.get_todo_by_todo_id", return_value = None)
+    mocker.patch.object(ToDoRepository,"get_todo_by_todo_id", return_value = None)
     response = client.delete("/todos/1")
     assert response.status_code == 404
     assert response.json() == {"detail": "ToDo Not found"}

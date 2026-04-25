@@ -1,17 +1,19 @@
 #main.py
 #2026-04-10
 #http://127.0.0.1:8000/docs
-from database.repository import get_todos, get_todo_by_todo_id, create_todo, update_todo, delete_todo
+#from database.repository import get_todos, get_todo_by_todo_id, create_todo, update_todo, delete_todo
 from fastapi import FastAPI, Body, HTTPException ,Depends
 from typing import Optional, List
-from database.connection import get_db
-from database.orm import ToDo
-from sqlalchemy.orm import Session
-
-from schema.request import CreateTodoRequest
-from schema.response import ToDoListSchema, ToDoSchema
+#from database.connection import get_db
+#from database.orm import ToDo
+#from sqlalchemy.orm import Session
+#from schema.request import CreateTodoRequest
+#from schema.response import ToDoListSchema, ToDoSchema
+from api import todo
 
 app = FastAPI()
+app.include_router(todo.router)
+
 """
 todo_data = {
     1: {"id": 1, "contents": "test1", "is_done": True,},
@@ -26,7 +28,7 @@ async def root():
 @app.get("/number")
 async def get_number(number: Optional[int] = None):
     return {"ping":"pong","number":number}
-
+"""
 @app.get("/todos")
 def get_todos_handler(
         order:str | None = None,
@@ -88,3 +90,4 @@ def delete_todos_handler(id: int, session: Session = Depends(get_db)):
     if not todo:
         raise HTTPException(status_code=404, detail="ToDo Not found")
     delete_todo(session = session, todo_id = id)
+"""
