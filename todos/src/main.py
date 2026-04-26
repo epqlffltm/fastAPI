@@ -4,14 +4,15 @@
 #from database.repository import get_todos, get_todo_by_todo_id, create_todo, update_todo, delete_todo
 from fastapi import FastAPI, Body, HTTPException ,Depends
 from typing import Optional, List
-#from database.connection import get_db
-#from database.orm import ToDo
+from database.connection import engine # get_db
+from database.orm import Base #ToDo
 #from sqlalchemy.orm import Session
 #from schema.request import CreateTodoRequest
 #from schema.response import ToDoListSchema, ToDoSchema
 from api import todo
 
 app = FastAPI()
+Base.metadata.create_all(bind=engine)
 app.include_router(todo.router)
 
 """
