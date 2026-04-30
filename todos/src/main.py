@@ -9,11 +9,12 @@ from database.orm import Base #ToDo
 #from sqlalchemy.orm import Session
 #from schema.request import CreateTodoRequest
 #from schema.response import ToDoListSchema, ToDoSchema
-from api import todo
+from api import todo, user
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
 app.include_router(todo.router)
+app.include_router(user.router)
 
 """
 todo_data = {

@@ -11,3 +11,8 @@ class CreateTodoRequest(BaseModel):
 
 #class ToDoListSchema(BaseModel):
 #    todos: list[ToDoSchema]
+
+class SignUpRequest(BaseModel):
+    username: str
+    password: str
+

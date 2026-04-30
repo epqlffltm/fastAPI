@@ -11,3 +11,9 @@ class ToDoSchema(BaseModel):
 
 class ToDoListSchema(BaseModel):
     todos: List[ToDoSchema]
+
+class UserSchema(BaseModel):
+    id: int
+    username: str
+
+    model_config = ConfigDict(from_attributes=True)

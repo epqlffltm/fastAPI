@@ -1,0 +1,24 @@
+from database.repository import UserRepository
+from server.user import UserService
+from database.orm import User
+
+def test_user_sign_up(client,mocker):
+    hash_password = mocker.patch.object(UserService,"hash_password",return_value = "hashed")
+
+
+    user_crearte = mocker.patch.object(User,"create",return_value=User(id=None, username="test", password="hashed"))
+
+    mocker.patch.object(UserRepository,"save_user",return_value=User(id=1, username="test", password="hashed"))
+
+    body={
+        "username": "test",
+        "password": "plain",
+    }
+    response = client.post("/users/sign-up", json=body)
+
+    hash_password.assert_called_once_with(plain_password="plain")
+
+    user_crearte.assert_called_once_with(username="test", hashed_password="hashed")
+
+    assert response.status_code == 201
+    assert response.json() == {"id": 1, "username": "test",}
