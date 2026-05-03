@@ -1,15 +1,16 @@
 #api/dodo.py
 #2026-04-10
 #http://127.0.0.1:8000/docs
-from database.repository import ToDoRepository  #get_todos, get_todo_by_todo_id, create_todo, update_todo, delete_todo
+from database.repository import ToDoRepository, UserRepository  # get_todos, get_todo_by_todo_id, create_todo, update_todo, delete_todo
 from fastapi import FastAPI, Body, HTTPException, Depends, APIRouter
 from typing import Optional, List
 from database.connection import get_db
-from database.orm import ToDo
+from database.orm import ToDo, User
 from sqlalchemy.orm import Session
-
 from schema.request import CreateTodoRequest
 from schema.response import ToDoListSchema, ToDoSchema
+from security import get_access_token
+from server.user import UserService
 
 router = APIRouter(prefix="/todos")
 
@@ -24,11 +25,22 @@ todo_data = {
 
 @router.get("")
 def get_todos_handler(
+        access_token:str = Depends(get_access_token),
         order: str | None = None,
+        user_service: UserService = Depends(),
+        user_repo: UserRepository = Depends(),
         #session: Session = Depends(get_db),
         todo_repo: ToDoRepository = Depends(),
 ) -> ToDoListSchema:
-    todos: List[ToDo] = todo_repo.get_todos()
+
+    username: str = user_service.decode_jwt(access_token=access_token)
+    user: User | None = user_repo.get_user_by_username(username)
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+
+
+    print(access_token)
+    todos: List[ToDo] = user.todos
 
     # ret = list(todo_data.values())
     if order and order == "DESC":

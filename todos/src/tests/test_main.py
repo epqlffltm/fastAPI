@@ -4,9 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from main import app
 from database.connection import get_db
-from database.orm import ToDo #테이블 생성을 위해 임포트
+from database.orm import ToDo, User  # 테이블 생성을 위해 임포트
 #from schema.response import ToDoListSchema
-from database.repository import ToDoRepository
+from database.repository import ToDoRepository, UserRepository
+from server.user import UserService
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_todos.db"
 
@@ -36,14 +37,21 @@ def test_get_todos(mocker, client):
 #    client.post("/todos", json={"contents": "fastapi section 2", "is_done": True})
 #    client.post("/todos", json={"contents": "fastapi section 3", "is_done": True})
 
+    access_token: str = UserService().create_jwt(username="test")
+    headers = {"Authorization": f"Bearer {access_token}"}
+    user = User(id=1, username="test", password="hashed")
     # order=ASC
-    mocker.patch.object(ToDoRepository,"get_todos", return_value= [
+
+    #mocker.patch.object(ToDoRepository,"get_todos", return_value= [
+    user.token = [
         ToDo(id=1, contents="fastapi section 1", is_done=True),
         ToDo(id=2, contents="fastapi section 2", is_done=False),
-    ])
-    response = client.get("/todos")
-    assert response.status_code == 200
-    response = client.get("/todos")
+    ]
+    mocker.patch.object(UserRepository,"get_user_by_username", return_value=user)
+    # order=ASC
+    #response = client.get("/todos")
+    #assert response.status_code == 200
+    response = client.get("/todos",headers=headers)
     assert response.status_code == 200
     assert response.json() == {"todos": [
         {"id": 1, "contents":"fastapi section 1", "is_done" : True},
@@ -52,7 +60,7 @@ def test_get_todos(mocker, client):
     ]}
 
     #order=DESC
-    response = client.get("/todos?order=DESC")
+    response = client.get("/todos?order=DESC", headers=headers)
     assert response.status_code == 200
     assert response.json() == {"todos": [
         #{"id": 3, "contents":"fastapi section 3", "is_done" : True},
