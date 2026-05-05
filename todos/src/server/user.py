@@ -1,5 +1,5 @@
 #server/user.py
-import bcrypt
+import bcrypt, random, time
 from datetime import datetime, timedelta
 from jose import jwt
 
@@ -28,3 +28,12 @@ class UserService:
         payload = jwt.decode(access_token, self.secret_key, algorithms=[self.jwt_algorithm])
         #expire
         return payload["sub"] #username
+
+    @staticmethod
+    def create_otp() -> int:
+        return random.randint(1000, 99999)
+
+    @staticmethod
+    def send_email_to_user(self,email: str) -> None:
+        time.sleep(10)
+        print(f"sending email to{email}")
